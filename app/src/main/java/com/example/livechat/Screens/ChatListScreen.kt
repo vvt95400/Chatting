@@ -62,9 +62,10 @@ fun ChatListScreen(navController: NavHostController, vm: LCViewModel) {
             floatingActionButton = {
                 FAB(
                     showDialog = showDialog.value,
-                    onFABClick =  onFABClick ,
-                    onDismiss =  onDismiss ,
-                    onAddChat =  onAddChat )
+                    onFABClick = onFABClick,
+                    onDismiss = onDismiss,
+                    onAddChat = onAddChat
+                )
             },
             content = {
                 Column(
@@ -95,10 +96,13 @@ fun ChatListScreen(navController: NavHostController, vm: LCViewModel) {
                                 }
 
                                 CommonRow(imageUrl = chatUser.imageUrl, name = chatUser.name) {
-                                    chatUser.userId?.let{
+                                    chatUser.userId?.let {
                                         navigateTo(
                                             navController,
-                                            DestinationScreen.SingleChat.createRoute(id = it)
+                                            DestinationScreen.SingleChat.createRoute(
+                                                id = chat.chatId ?: "",
+
+                                            )
                                         )
                                     }
                                 }
@@ -159,7 +163,7 @@ fun FAB(
         containerColor = MaterialTheme.colorScheme.secondary,
         shape = CircleShape,
         modifier = Modifier
-            .padding(bottom = 70.dp,end = 30.dp)
+            .padding(bottom = 50.dp, end = 30.dp)
             .size(width = 50.dp, height = 50.dp)
     ) {
         Icon(

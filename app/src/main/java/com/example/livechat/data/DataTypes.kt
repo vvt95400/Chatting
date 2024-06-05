@@ -21,8 +21,20 @@ data class ChatData(
 )
 
 data class ChatUser(
-    val imageUrl : String?="",
+    val userId : String?="",
     val name : String?="",
     val number : String?="",
-    val userId : String?=""
+    val imageUrl : String?=""
+)
+
+data class Message(
+    var sendBy: String?="",
+    var message: String?="",
+    var timeStamp: String?=""
+)
+
+data class Status(
+    val user : ChatUser = ChatUser(),
+    val imageUrl : String?="",
+    val timeStamp : Long?=null
 )

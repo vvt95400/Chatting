@@ -1,5 +1,7 @@
 package com.example.livechat.Screens
 
+import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -16,7 +18,14 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
@@ -39,6 +49,7 @@ import com.example.livechat.CommonImage
 import com.example.livechat.CommonProgressBar
 import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
+import com.example.livechat.TitleText
 import com.example.livechat.navigateTo
 import com.squareup.picasso.Picasso
 
@@ -59,13 +70,8 @@ fun ProfileScreen(navController: NavController, vm: LCViewModel) {
     if (inProcess) {
         CommonProgressBar()
     } else {
-        ProfileContent(
+        NewLayout(
             vm = vm,
-            modifier = Modifier
-                .padding(8.dp)
-                .verticalScroll(
-                    rememberScrollState()
-                ),
             name = name,
             number = number,
             imageUrl = imageUrl,
@@ -84,11 +90,130 @@ fun ProfileScreen(navController: NavController, vm: LCViewModel) {
             },
             navController = navController
         )
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-            BottomNavigationMenu(
-                selectedItem = BottomNavigationItem.PROFILE, navController = navController
+//        ProfileContent(
+//            vm = vm,
+//            modifier = Modifier
+//                .padding(8.dp)
+//                .verticalScroll(
+//                    rememberScrollState()
+//                ),
+//            name = name,
+//            number = number,
+//            imageUrl = imageUrl,
+//            onNameChange = { name = it },
+//            onNumberChange = { number = it },
+//            onBack = {
+//                navigateTo(navController = navController, route = DestinationScreen.ChatList.route)
+//            },
+//            onSave = {
+//                vm.createOrUpdateProfile(name = name, number = number)
+//                navigateTo(navController = navController, route = DestinationScreen.Profile.route)
+//            },
+//            onLogout = {
+//                vm.logout()
+//                navigateTo(navController = navController, route = DestinationScreen.SignUp.route)
+//            },
+//            navController = navController
+//        )
+//        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
+//            BottomNavigationMenu(
+//                selectedItem = BottomNavigationItem.PROFILE, navController = navController
+//            )
+//        }
+
+
+    }
+}
+
+@Composable
+fun NewLayout(
+    vm: LCViewModel,
+    name: String,
+    number: String,
+    imageUrl: String,
+    onNameChange: (String) -> Unit,
+    onNumberChange: (String) -> Unit,
+    onBack: () -> Unit,
+    onSave: () -> Unit,
+    onLogout: () -> Unit,
+    navController: NavController
+) {
+
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+
+        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top){
+            Icon(
+                Icons.Rounded.ArrowBack,
+                null,
+                modifier = Modifier
+                    .clickable { onBack.invoke() }
+                    .padding(8.dp),
+            )
+            Text(
+                text = "Profile",
+                fontWeight = FontWeight.Bold,
+                fontSize = 32.sp,
+                modifier = Modifier.padding(13.dp),
+                color = colorScheme.primary
+            )
+            Icon(
+                Icons.Rounded.Save,
+                null,
+                modifier = Modifier
+                    .clickable { onSave.invoke() }
+                    .padding(8.dp),
             )
         }
+
+        CommonDivider()
+
+        Card(
+            modifier = Modifier.padding(8.dp),
+//            shape = MaterialTheme,
+            elevation = CardDefaults.cardElevation(4.dp)
+        ) {
+            ProfileImage(imageUrl = imageUrl, vm = vm, navController = navController)
+        }
+
+        CommonDivider()
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Name", modifier = Modifier.width(100.dp))
+            TextField(
+                value = name, onValueChange = onNameChange, colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+            )
+        }
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(text = "Number", modifier = Modifier.width(100.dp))
+            TextField(
+                value = number,
+                onValueChange = onNumberChange,
+                colors = TextFieldDefaults.colors(
+                    focusedTextColor = Color.Black,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    disabledContainerColor = Color.Transparent
+                )
+            )
+        }
+
+
     }
 }
 
@@ -106,6 +231,8 @@ fun ProfileContent(
     onLogout: () -> Unit,
     navController: NavController
 ) {
+
+    TitleText(txt = "Profile")
     Scaffold(topBar = {
         Card(
             modifier = Modifier
@@ -225,6 +352,7 @@ fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavControlle
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
+                Log.d("TAG", "line 229")
                 vm.uploadProfileImage(uri) {
                     imgUrl = it.toString()
                     navigateTo(
@@ -270,3 +398,4 @@ fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavControlle
         }
     }
 }
+

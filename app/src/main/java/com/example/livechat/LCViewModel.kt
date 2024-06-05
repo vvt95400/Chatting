@@ -2,28 +2,29 @@ package com.example.livechat
 
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.platform.LocalContext
 import androidx.core.text.isDigitsOnly
 import androidx.lifecycle.ViewModel
-import com.example.livechat.Screens.LoginScreen
-import com.example.livechat.Screens.ProfileScreen
 import com.example.livechat.data.CHATS
 import com.example.livechat.data.ChatData
 import com.example.livechat.data.ChatUser
 import com.example.livechat.data.Event
+import com.example.livechat.data.MESSAGES
+import com.example.livechat.data.Message
+import com.example.livechat.data.STATUS
+import com.example.livechat.data.Status
 import com.example.livechat.data.USER_NODE
 import com.example.livechat.data.UserData
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.Filter
 import com.google.firebase.firestore.FirebaseFirestore
-import com.google.firebase.firestore.auth.User
+import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.toObject
 import com.google.firebase.firestore.toObjects
 import com.google.firebase.storage.FirebaseStorage
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.lang.Exception
+import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
 
@@ -40,6 +41,11 @@ class LCViewModel @Inject constructor(
     var signIn = mutableStateOf(false)
     var userData = mutableStateOf<UserData?>(null)
     val chats = mutableStateOf<List<ChatData>>(listOf())
+    val chatMessages = mutableStateOf<List<Message>>(listOf())
+    val inProgressChatMessage = mutableStateOf(false)
+    var currentChatMessageListner: ListenerRegistration? = null
+    val status = mutableStateOf<List<Status>>(listOf())
+    val inProgressStatus = mutableStateOf(false)
 
     init {
         val currentUser = auth.currentUser
@@ -49,18 +55,31 @@ class LCViewModel @Inject constructor(
         }
     }
 
-    fun populateChats(){
+    fun populateChats() {
         inProgressChats.value = true
-        db.collection(CHATS).where(Filter.or(
-            Filter.equalTo("user1.userID",userData.value?.userId),
-            Filter.equalTo("user2.userID", userData.value?.userId),
-        )).addSnapshotListener{
-            value, error ->
-            if(error!=null){
-                Log.d("TAG", "Stopping on 60")
+        val currentUserId = userData.value?.userId
+
+        if (currentUserId == null) {
+            Log.d("TAG", "User data is not available")
+            handleException(customMessage = "User data is not available")
+            inProgressChats.value = false
+            return
+        }
+
+        db.collection(CHATS).where(
+            Filter.or(
+                Filter.equalTo("user1.userId", currentUserId),
+                Filter.equalTo("user2.userId", currentUserId)
+            )
+        ).addSnapshotListener { value, error ->
+            if (error != null) {
+                Log.d("TAG", "Error fetching chats: ${error.message}")
                 handleException(error)
+                inProgressChats.value = false
+                return@addSnapshotListener
             }
-            if(value!=null){
+
+            if (value != null) {
                 Log.d("TAG", "QuerySnapshot contents:")
                 for (doc in value.documents) {
                     Log.d("TAG", "Document ID: ${doc.id}")
@@ -72,13 +91,14 @@ class LCViewModel @Inject constructor(
                 Log.d("TAG", "Mapped chats list: $chatsList")
                 chats.value = chatsList
                 Log.d("TAG", "Updated chats value: ${chats.value}")
-                inProgressChats.value = false
-            }else{
+            } else {
                 Log.d("TAG", "No data found")
+                chats.value = emptyList()
             }
-
+            inProgressChats.value = false
         }
     }
+
 
     fun signUp(name: String, number: String, email: String, password: String) {
         inProgress.value = true
@@ -129,7 +149,7 @@ class LCViewModel @Inject constructor(
     }
 
     fun uploadProfileImage(uri: Uri, onSuccess: (Uri) -> Unit) {
-
+        Log.d("TAG", "line 132")
         uploadImage(uri) {
             createOrUpdateProfile(imageUrl = it.toString())
             onSuccess(it)
@@ -145,6 +165,7 @@ class LCViewModel @Inject constructor(
         uploadTask.addOnSuccessListener {
             val result = it.metadata?.reference?.downloadUrl
             result?.addOnSuccessListener {
+                Log.d("TAG", "line 148")
                 onSuccess(it)
             }
             inProgress.value = false
@@ -157,7 +178,7 @@ class LCViewModel @Inject constructor(
     fun createOrUpdateProfile(
         name: String? = null,
         number: String? = null,
-        imageUrl: String? = "https://firebasestorage.googleapis.com/v0/b/livechat2-2db8f.appspot.com/o/images%2Fd218d366-d825-47d0-8f7e-5cafa8fcfc77?alt=media&token=8bc882ee-a3f9-4f4a-af18-1ef211175208"
+        imageUrl: String? = null
     ) {
         val uid = auth.currentUser?.uid
         uid?.let { userId ->
@@ -181,32 +202,6 @@ class LCViewModel @Inject constructor(
         }
     }
 
-
-//    fun createOrUpdateProfile(name: String?=null, number: String?=null, imageUrl : String?="https://firebasestorage.googleapis.com/v0/b/livechat2-2db8f.appspot.com/o/images%2Fd218d366-d825-47d0-8f7e-5cafa8fcfc77?alt=media&token=8bc882ee-a3f9-4f4a-af18-1ef211175208") {
-//        var uid  = auth.currentUser?.uid
-//        val userData = UserData(
-//            userId = uid,
-//            name = name?:userData.value?.name,
-//            number = number?:userData.value?.number,
-//            imageUrl = imageUrl?:userData.value?.imageUrl
-//        )
-//
-//        uid?.let{
-//            inProgress.value = true
-//            db.collection(USER_NODE).document(uid).get().addOnSuccessListener {
-//                if(it.exists()){
-//
-//                }else{
-//                    db.collection(USER_NODE).document(uid).set(userData)
-//                    getUserData(uid)
-//                    inProgress.value = false
-//                }
-//            }.addOnFailureListener{
-//                handleException(it,"Cannot Retrieve User")
-//            }
-//        }
-//    }
-
     private fun getUserData(uid: String) {
         db.collection(USER_NODE).document(uid).addSnapshotListener { value, error ->
             if (error != null) {
@@ -217,6 +212,7 @@ class LCViewModel @Inject constructor(
                 userData.value = user
                 inProgress.value = false
                 populateChats()
+                populateStatus()
             }
         }
     }
@@ -235,64 +231,394 @@ class LCViewModel @Inject constructor(
         auth.signOut()
         signIn.value = false
         userData.value = null
+        depopulateSingleChat()
+        currentChatMessageListner = null
         eventMutableState.value = Event("Logged Out")
     }
 
+
     fun onAddChat(number: String) {
-        if (number.isEmpty() or !number.isDigitsOnly()) {
-            Log.d("TAG", "Number must be contained digits only")
-            handleException(customMessage = "Number must be contained digits only")
-        } else {
-            db.collection(CHATS).where(
-                Filter.or(
-                    Filter.and(
-                        Filter.equalTo("user1.number", number),
-                        Filter.equalTo("user2.number", userData.value?.number)
-                    ),
-                    Filter.and(
-                        Filter.equalTo("user1.number", userData.value?.number),
-                        Filter.equalTo("user2.number", number)
-                    )
+        if (number.isEmpty() || !number.isDigitsOnly()) {
+            Log.d("TAG", "Number must contain digits only")
+            handleException(customMessage = "Number must contain digits only")
+            return
+        }
+
+        val currentUser = userData.value
+        if (currentUser == null) {
+            Log.d("TAG", "User data is not available")
+            handleException(customMessage = "User data is not available")
+            return
+        }
+
+        val userNumber = currentUser.number ?: ""
+        db.collection(CHATS).where(
+            Filter.or(
+                Filter.and(
+                    Filter.equalTo("user1.number", number),
+                    Filter.equalTo("user2.number", userNumber)
+                ),
+                Filter.and(
+                    Filter.equalTo("user1.number", userNumber),
+                    Filter.equalTo("user2.number", number)
                 )
-            ).get().addOnSuccessListener {
-                if (it.isEmpty()) {
-                    db.collection(USER_NODE).whereEqualTo("number", number).get()
-                        .addOnSuccessListener {
-                            if (it.isEmpty()) {
-                                Log.d("TAG", "Number Not Found")
-                                handleException(customMessage = "Number not Found")
-                            } else {
-                                val chatPartner = it.toObjects<UserData>()[0]
-                                val id = db.collection(CHATS).document().id
-                                var chat = ChatData(
-                                    chatId = id, ChatUser(
-                                        userData.value?.userId,
-                                        userData.value?.name,
-                                        userData.value?.imageUrl,
-                                        userData.value?.number
-                                    ),
-                                    ChatUser(
-                                        chatPartner.userId,
-                                        chatPartner.name,
-                                        chatPartner.imageUrl,
-                                        chatPartner.number
-                                    )
+            )
+        ).get().addOnSuccessListener { chatQuery ->
+            if (chatQuery.isEmpty) {
+                db.collection(USER_NODE).whereEqualTo("number", number).get()
+                    .addOnSuccessListener { userQuery ->
+                        if (userQuery.isEmpty) {
+                            Log.d("TAG", "Number not found")
+                            handleException(customMessage = "Number not found")
+                        } else {
+                            val chatPartner = userQuery.toObjects<UserData>()[0]
+                            val id = db.collection(CHATS).document().id
+                            val chat = ChatData(
+                                chatId = id,
+                                user1 = ChatUser(
+                                    currentUser.userId ?: "",
+                                    currentUser.name ?: "",
+                                    userNumber,
+                                    currentUser.imageUrl ?: ""
+                                ),
+                                user2 = ChatUser(
+                                    chatPartner.userId ?: "",
+                                    chatPartner.name ?: "",
+                                    chatPartner.number ?: "",
+                                    chatPartner.imageUrl ?: ""
                                 )
-                                db.collection(CHATS).document(id).set(chat)
-                                chats.value = emptyList()
+                            )
+                            db.collection(CHATS).document(id).set(chat).addOnSuccessListener {
                                 populateChats()
+                            }.addOnFailureListener { e ->
+                                Log.e("TAG", "Error adding chat: $e")
+                                handleException(e)
                             }
                         }
-                        .addOnFailureListener{
-                            Log.d("TAG", it.toString())
-                            handleException(it)
-                        }
-                } else {
-                    Log.d("TAG", "Chat already exists")
-                    handleException(customMessage = "Chat already exists")
-                }
+                    }
+                    .addOnFailureListener { e ->
+                        Log.e("TAG", "Error finding user: $e")
+                        handleException(e)
+                    }
+            } else {
+                Log.d("TAG", "Chat already exists")
+                handleException(customMessage = "Chat already exists")
             }
+        }.addOnFailureListener { e ->
+            Log.e("TAG", "Error finding chat: $e")
+            handleException(e)
         }
     }
+
+    fun onSendMessage(chatID: String, message: String) {
+        // Get the current timestamp
+        val time = Calendar.getInstance().time.toString()
+
+        // Create a message object
+        val msg = Message(
+            sendBy = userData.value?.userId,
+            message = message,
+            timeStamp = time
+        )
+
+        // Add the message to the specified chat document
+        db.collection(CHATS).document(chatID).collection(MESSAGES).document().set(msg)
+            .addOnSuccessListener {
+                Log.d("TAG", "Message sent successfully")
+                Log.d("TAG", chatID)
+            }
+            .addOnFailureListener { e ->
+                Log.e("TAG", "Error sending message: ", e)
+                handleException(e)
+            }
+    }
+
+    fun populateSingleChat(chatID: String) {
+        inProgressChatMessage.value = true
+        currentChatMessageListner = db.collection(CHATS).document(chatID).collection(MESSAGES)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    handleException(error)
+                    inProgressChatMessage.value = false
+                    return@addSnapshotListener
+
+                }
+                if (value != null) {
+                    chatMessages.value = value.documents.mapNotNull { doc ->
+                        doc.toObject<Message>()
+                    }.sortedBy { it.timeStamp }
+                    inProgressChatMessage.value = false
+                }
+            }
+    }
+
+    fun depopulateSingleChat() {
+        chatMessages.value = listOf()
+        currentChatMessageListner = null
+    }
+
+    fun uploadStatus(uri: Uri) {
+        uploadImage(uri) {
+            createStatus(it.toString())
+            Log.d("TAG","line 363")
+        }
+    }
+
+    fun createStatus(imageUrl: String) {
+        val newStatus = Status(
+            ChatUser(
+                userData.value?.userId ?: "",
+                userData.value?.name ?: "",
+                userData.value?.number ?: "",
+                userData.value?.imageUrl ?: ""
+            ), imageUrl = imageUrl,
+            timeStamp = System.currentTimeMillis()
+        )
+        Log.d("TAG","line 377")
+        db.collection(STATUS).document().set(newStatus)
+    }
+
+//    fun populateStatus() {
+//        val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
+//        val cutOff = System.currentTimeMillis() - timeDelta
+//        inProgressStatus.value = true
+//        val currentUserId = userData.value?.userId
+//
+//        if (currentUserId == null) {
+//            Log.d("TAG", "User data is not available")
+//            handleException(customMessage = "User data is not available")
+//            inProgressStatus.value = false
+//            return
+//        }
+//
+//        db.collection(CHATS).where(
+//            Filter.or(
+//                Filter.equalTo("user1.userId", currentUserId),
+//                Filter.equalTo("user2.userId", currentUserId)
+//            )
+//        ).addSnapshotListener { value, error ->
+//            if (error != null) {
+//                Log.d("TAG","line 401")
+//                Log.d("TAG", "Error fetching chats: ${error.message}")
+//                handleException(error)
+//                inProgressStatus.value = false
+//                return@addSnapshotListener
+//            }
+//
+//            if (value != null) {
+//                Log.d("TAG", "QuerySnapshot contents:")
+//                for (doc in value.documents) {
+//                    Log.d("TAG", "Document ID: ${doc.id}")
+//                    Log.d("TAG", "Document data: ${doc.data}")
+//                }
+//
+//                val currentConnections = arrayListOf(userData.value?.userId)
+//                val chats = value.toObjects<ChatData>()
+//                chats.forEach { chat ->
+//                    if (chat.user1.userId == currentUserId) {
+//                        currentConnections.add(chat.user2.userId)
+//                    } else if (chat.user2.userId == currentUserId) {
+//                        currentConnections.add(chat.user1.userId)
+//                    }
+//                }
+//
+//                db.collection(STATUS).whereGreaterThan("timeStamp", cutOff).whereIn("user.userId", currentConnections)
+//                    .addSnapshotListener { value, error ->
+//                        if(error != null){
+//                            handleException(error)
+//                        }
+//                        if(value != null){
+//                            Log.d("TAG","line 401")
+//                            status.value = value.toObjects()
+//                            inProgressStatus.value = false
+//                        }
+//                    }
+//            } else {
+//                Log.d("TAG", "No data found")
+//                chats.value = emptyList()
+//            }
+//            inProgressStatus.value = false
+//
+//        }
+//    }
+
+    fun populateStatus() {
+        val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
+        val cutOff = System.currentTimeMillis() - timeDelta
+        inProgressStatus.value = true
+        val currentUserId = userData.value?.userId
+
+        if (currentUserId == null) {
+            Log.d("TAG", "User data is not available")
+            handleException(customMessage = "User data is not available")
+            inProgressStatus.value = false
+            return
+        }
+
+        db.collection(CHATS)
+            .where(
+                Filter.or(
+                    Filter.equalTo("user1.userId", currentUserId),
+                    Filter.equalTo("user2.userId", currentUserId)
+                )
+            )
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.d("TAG", "Error fetching chats: ${error.message}")
+                    handleException(error)
+                    inProgressStatus.value = false
+                    return@addSnapshotListener
+                }
+
+                if (value != null) {
+                    Log.d("TAG", "QuerySnapshot contents:")
+                    for (doc in value.documents) {
+                        Log.d("TAG", "Document ID: ${doc.id}")
+                        Log.d("TAG", "Document data: ${doc.data}")
+                    }
+
+                    val currentConnections = arrayListOf(currentUserId)
+                    val chats = value.toObjects<ChatData>()
+                    chats.forEach { chat ->
+                        if (chat.user1.userId == currentUserId) {
+                            chat.user2.userId?.let { currentConnections.add(it) }
+                        } else if (chat.user2.userId == currentUserId) {
+                            chat.user1.userId?.let { currentConnections.add(it) }
+                        }
+                    }
+
+                    if (currentConnections.isNotEmpty()) {
+                        Log.d("TAGSTATUS", "Current connections: $currentConnections")
+
+                        // Simplified test query
+                        val testUserIds = listOf("knownUserId1", "knownUserId2") // Replace with actual known user IDs
+                        db.collection(STATUS)
+                            .whereIn("user.userId", testUserIds)
+                            .get()
+                            .addOnCompleteListener { task ->
+                                if (task.isSuccessful) {
+                                    val documents = task.result
+                                    if (documents != null) {
+                                        Log.d("TAGSTATUS", "Test query statuses retrieved: ${documents.size()}")
+                                        for (doc in documents) {
+                                            Log.d("TAGSTATUS", "Document ID: ${doc.id}")
+                                            Log.d("TAGSTATUS", "Document data: ${doc.data}")
+                                        }
+                                    } else {
+                                        Log.d("TAGSTATUS", "Test query no statuses found")
+                                    }
+                                } else {
+                                    Log.d("TAGSTATUS", "Test query failed: ${task.exception?.message}")
+                                }
+                            }
+
+                        db.collection(STATUS)
+                            .whereGreaterThan("timeStamp", cutOff)
+                            .whereIn("user.userId", currentConnections)
+                            .addSnapshotListener { value, error ->
+                                if (error != null) {
+                                    Log.d("TAGSTATUS", "Error fetching statuses: ${error.message}")
+                                    handleException(error)
+                                    inProgressStatus.value = false
+                                    return@addSnapshotListener
+                                }
+
+                                if (value != null) {
+                                    Log.d("TAGSTATUS", "Statuses retrieved: ${value.documents.size}")
+                                    status.value = value.toObjects()
+                                } else {
+                                    Log.d("TAGSTATUS", "No statuses found")
+                                    status.value = emptyList()
+                                }
+                                inProgressStatus.value = false
+                            }
+                    } else {
+                        Log.d("TAG", "No connections found")
+                        inProgressStatus.value = false
+                    }
+                } else {
+                    Log.d("TAG", "No data found")
+                    status.value = emptyList()
+                    inProgressStatus.value = false
+                }
+            }
+    }
+
+    fun depopulateStatus() {
+        status.value = emptyList()
+    }
+
+
+//    fun populateStatus() {
+//        val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
+//        val cutOff = System.currentTimeMillis() - timeDelta
+//        inProgressStatus.value = true
+//        val currentUserId = userData.value?.userId
+//
+//        if (currentUserId == null) {
+//            Log.d("TAGSTATUS", "Statuses retrieved")
+//            Log.d("TAG", "User data is not available")
+//            handleException(customMessage = "User data is not available")
+//            inProgressStatus.value = false
+//            return
+//        }
+//        Log.d("TAGSTATUS", "Statuses retrieved")
+//
+//        db.collection(CHATS).where(
+//            Filter.or(
+//                Filter.equalTo("user1.userId", currentUserId),
+//                Filter.equalTo("user2.userId", currentUserId)
+//            )
+//        ).addSnapshotListener { value, error ->
+//            if (error != null) {
+//                Log.d("TAG","Error fetching chats: ${error.message}")
+//                handleException(error)
+//                inProgressStatus.value = false
+//                return@addSnapshotListener
+//            }
+//
+//            if (value != null) {
+//                Log.d("TAG", "QuerySnapshot contents:")
+//                for (doc in value.documents) {
+//                    Log.d("TAG", "Document ID: ${doc.id}")
+//                    Log.d("TAG", "Document data: ${doc.data}")
+//                }
+//
+//                val currentConnections = mutableListOf<String>()
+//                val chats = value.toObjects<ChatData>()
+//                chats.forEach { chat ->
+//                    if (chat.user1.userId == currentUserId) {
+//                        chat.user2.userId?.let { currentConnections.add(chat.toString()) }
+//                    } else if (chat.user2.userId == currentUserId) {
+//                        chat.user1.userId?.let { currentConnections.add(chat.toString()) }
+//                    }
+//                }
+//                if (currentConnections.isNotEmpty()) {
+//                    Log.d("TAGSTATUS", "Statuses retrieved 491")
+//                    db.collection(STATUS).whereIn("user.userId", currentConnections)
+//                        .addSnapshotListener { value, error ->
+//                            if (error != null) {
+//                                Log.d("TAGSTATUS", "Statuses retrieved 494")
+//                                handleException(error)
+//                            }
+//                            if (value != null) {
+//                                Log.d("TAGSTATUS", "Statuses retrieved: ${value.documents.size}")
+//                                status.value = value.toObjects()
+//                            }
+//                            inProgressStatus.value = false
+//                        }
+//                } else {
+//                    Log.d("TAG", "No connections found")
+//                    inProgressStatus.value = false
+//                }
+//            } else {
+//                Log.d("TAG", "No data found")
+//                inProgressStatus.value = false
+//            }
+//        }
+//    }
+
 }
 
+
+//.whereGreaterThan("timeStamp", cutOff)

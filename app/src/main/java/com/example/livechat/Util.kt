@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.effect.Crop
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
+import com.example.livechat.ui.theme.darkheading
 
 fun navigateTo(navController: NavController, route: String) {
     navController.navigate(route) {
@@ -94,8 +97,9 @@ fun TitleText(txt: String) {
     Text(
         text = txt,
         fontWeight = FontWeight.Bold,
-        fontSize = 35.sp,
-        modifier = Modifier.padding(8.dp)
+        fontSize = 32.sp,
+        modifier = Modifier.padding(13.dp),
+        color = colorScheme.primary
     )
 }
 
@@ -108,19 +112,20 @@ fun CommonRow(imageUrl: String?, name: String?, onItemClick: () -> Unit) {
             .clickable {
                 onItemClick.invoke()
             }, verticalAlignment = Alignment.CenterVertically
-    ) {
+    ){
         CommonImage(
             data = imageUrl,
             modifier = Modifier
                 .padding(8.dp)
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color.Cyan)
+                .background(Color.LightGray)
         )
         Text(
             text = name ?: "---",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp)
+            modifier = Modifier.padding(start = 4.dp),
+            color = colorScheme.secondary
         )
 
     }
