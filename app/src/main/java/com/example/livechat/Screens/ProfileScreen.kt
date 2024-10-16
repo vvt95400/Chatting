@@ -4,11 +4,14 @@ import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,19 +20,28 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material.icons.rounded.Save
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,6 +63,9 @@ import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
 import com.example.livechat.TitleText
 import com.example.livechat.navigateTo
+import com.example.livechat.ui.theme.lightheading
+import com.example.livechat.ui.theme.lightmyText
+import com.example.livechat.ui.theme.lightyourText
 import com.squareup.picasso.Picasso
 
 @Composable
@@ -70,7 +85,8 @@ fun ProfileScreen(navController: NavController, vm: LCViewModel) {
     if (inProcess) {
         CommonProgressBar()
     } else {
-        NewLayout(
+        ProfileContent(
+            modifier = Modifier,
             vm = vm,
             name = name,
             number = number,
@@ -90,136 +106,13 @@ fun ProfileScreen(navController: NavController, vm: LCViewModel) {
             },
             navController = navController
         )
-//        ProfileContent(
-//            vm = vm,
-//            modifier = Modifier
-//                .padding(8.dp)
-//                .verticalScroll(
-//                    rememberScrollState()
-//                ),
-//            name = name,
-//            number = number,
-//            imageUrl = imageUrl,
-//            onNameChange = { name = it },
-//            onNumberChange = { number = it },
-//            onBack = {
-//                navigateTo(navController = navController, route = DestinationScreen.ChatList.route)
-//            },
-//            onSave = {
-//                vm.createOrUpdateProfile(name = name, number = number)
-//                navigateTo(navController = navController, route = DestinationScreen.Profile.route)
-//            },
-//            onLogout = {
-//                vm.logout()
-//                navigateTo(navController = navController, route = DestinationScreen.SignUp.route)
-//            },
-//            navController = navController
-//        )
-//        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Bottom) {
-//            BottomNavigationMenu(
-//                selectedItem = BottomNavigationItem.PROFILE, navController = navController
-//            )
-//        }
-
-
     }
 }
 
-@Composable
-fun NewLayout(
-    vm: LCViewModel,
-    name: String,
-    number: String,
-    imageUrl: String,
-    onNameChange: (String) -> Unit,
-    onNumberChange: (String) -> Unit,
-    onBack: () -> Unit,
-    onSave: () -> Unit,
-    onLogout: () -> Unit,
-    navController: NavController
-) {
-
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.Top){
-            Icon(
-                Icons.Rounded.ArrowBack,
-                null,
-                modifier = Modifier
-                    .clickable { onBack.invoke() }
-                    .padding(8.dp),
-            )
-            Text(
-                text = "Profile",
-                fontWeight = FontWeight.Bold,
-                fontSize = 32.sp,
-                modifier = Modifier.padding(13.dp),
-                color = colorScheme.primary
-            )
-            Icon(
-                Icons.Rounded.Save,
-                null,
-                modifier = Modifier
-                    .clickable { onSave.invoke() }
-                    .padding(8.dp),
-            )
-        }
-
-        CommonDivider()
-
-        Card(
-            modifier = Modifier.padding(8.dp),
-//            shape = MaterialTheme,
-            elevation = CardDefaults.cardElevation(4.dp)
-        ) {
-            ProfileImage(imageUrl = imageUrl, vm = vm, navController = navController)
-        }
-
-        CommonDivider()
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "Name", modifier = Modifier.width(100.dp))
-            TextField(
-                value = name, onValueChange = onNameChange, colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent
-                )
-            )
-        }
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Text(text = "Number", modifier = Modifier.width(100.dp))
-            TextField(
-                value = number,
-                onValueChange = onNumberChange,
-                colors = TextFieldDefaults.colors(
-                    focusedTextColor = Color.Black,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    disabledContainerColor = Color.Transparent
-                )
-            )
-        }
-
-
-    }
-}
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileContent(
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
     vm: LCViewModel,
     name: String,
     number: String,
@@ -231,120 +124,109 @@ fun ProfileContent(
     onLogout: () -> Unit,
     navController: NavController
 ) {
-
-    TitleText(txt = "Profile")
-    Scaffold(topBar = {
-        Card(
-            modifier = Modifier
-                .height(64.dp)
-                .padding(horizontal = 4.dp)
-                .padding(vertical = 4.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Back",
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .padding(start = 10.dp)
-                        .clickable {
-                            onBack.invoke()
-                        },
-                    fontSize = 20.sp,
-                    color = Color.Blue
-                )
-
-                Text(
-                    text = "Profile",
-                    modifier = Modifier.padding(8.dp),
-                    fontSize = 35.sp,
-                    color = Color.Black
-                )
-
-                Text(
-                    text = "Save",
-                    modifier = Modifier
-                        .padding(5.dp)
-                        .padding(end = 10.dp)
-                        .clickable {
-                            onSave.invoke()
-                        },
-                    fontSize = 20.sp,
-                    color = Color.Blue
-                )
-            }
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Profile",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                },
+                navigationIcon = {
+                    IconButton(onClick = onBack) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    }
+                },
+                actions = {
+                    TextButton(onClick = onSave) {
+                        Text("Save", fontSize = 20.sp, color = Color.White)
+                    }
+                },
+                colors = TopAppBarDefaults.smallTopAppBarColors(
+                    containerColor = lightheading
+                ),
+                scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+            )
+        },
+        bottomBar = {
+            BottomNavigationMenu(
+                selectedItem = BottomNavigationItem.PROFILE,
+                navController = navController,
+                modifier = Modifier.padding(0.dp)
+            )
         }
-    }) {
+    ) { paddingValues ->
 
         Column(
             modifier = Modifier
-                .padding(it)
+                .padding(paddingValues)
                 .fillMaxSize()
+                .background(color = lightmyText),
+            verticalArrangement = Arrangement.Top,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            CommonDivider()
+            // Profile Image Section
+            ProfileImage(imageUrl = imageUrl, vm = vm, navController = navController)
 
-            Card(modifier = Modifier.padding(it)) {
-                ProfileImage(imageUrl = imageUrl, vm = vm, navController = navController)
-            }
+            Spacer(modifier = Modifier.height(16.dp))
 
-            CommonDivider()
-
+            // Name Input
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Name", modifier = Modifier.width(100.dp))
+                Text(text = "Name", modifier = Modifier.width(100.dp).padding(16.dp), fontSize = 18.sp)
                 TextField(
-                    value = name, onValueChange = onNameChange, colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    )
+                    value = name,
+                    onValueChange = onNameChange,
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray
+                    ),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
             }
 
+            // Number Input
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
+                    .padding(bottom = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = "Number", modifier = Modifier.width(100.dp))
+                Text(text = "Number", modifier = Modifier.width(100.dp).padding(16.dp), fontSize = 18.sp)
                 TextField(
                     value = number,
                     onValueChange = onNumberChange,
-                    colors = TextFieldDefaults.colors(
-                        focusedTextColor = Color.Black,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent
-                    )
+                    colors = TextFieldDefaults.textFieldColors(
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray
+                    ),
+                    modifier = Modifier.fillMaxWidth().padding(16.dp)
                 )
             }
 
-            CommonDivider()
+            Spacer(modifier = Modifier.height(24.dp))
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.Center
+            // Logout Button
+            Button(
+                onClick = onLogout,
+                colors = ButtonDefaults.buttonColors(containerColor = lightyourText),
+                modifier = Modifier.padding(25.dp).width(200.dp),
+                shape = RoundedCornerShape(50)
             ) {
-                Text(text = "Log Out", modifier = Modifier.clickable {
-                    onLogout.invoke()
-                })
+                Text(text = "Log Out", color = Color.White, fontSize = 18.sp)
             }
         }
     }
-
 }
+
 
 @Composable
 fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavController) {

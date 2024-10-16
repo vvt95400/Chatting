@@ -33,6 +33,7 @@ import androidx.media3.effect.Crop
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
 import com.example.livechat.ui.theme.darkheading
+import com.example.livechat.ui.theme.lightheading
 
 fun navigateTo(navController: NavController, route: String) {
     navController.navigate(route) {
@@ -93,18 +94,21 @@ fun checkSignedIn(vm: LCViewModel, navController: NavController) {
 }
 
 @Composable
-fun TitleText(txt: String) {
+fun TitleText(txt: String, modifier: Modifier) {
     Text(
         text = txt,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
-        modifier = Modifier.padding(13.dp),
-        color = colorScheme.primary
-    )
+        modifier = Modifier
+            .padding(13.dp),
+//            .background(color = lightheading),
+        color = Color.White,
+
+        )
 }
 
 @Composable
-fun CommonRow(imageUrl: String?, name: String?, onItemClick: () -> Unit) {
+fun CommonRow(imageUrl: String?, name: String?,modifier: Modifier, onItemClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -112,20 +116,20 @@ fun CommonRow(imageUrl: String?, name: String?, onItemClick: () -> Unit) {
             .clickable {
                 onItemClick.invoke()
             }, verticalAlignment = Alignment.CenterVertically
-    ){
+    ) {
         CommonImage(
             data = imageUrl,
             modifier = Modifier
                 .padding(8.dp)
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color.LightGray)
+                .background(Color.Cyan)
         )
         Text(
             text = name ?: "---",
             fontWeight = FontWeight.Bold,
             modifier = Modifier.padding(start = 4.dp),
-            color = colorScheme.secondary
+            color = Color.Black
         )
 
     }

@@ -26,6 +26,8 @@ import androidx.navigation.NavController
 import com.example.livechat.DestinationScreen
 import com.example.livechat.R
 import com.example.livechat.navigateTo
+import com.example.livechat.ui.theme.lightheading
+import com.example.livechat.ui.theme.lightyourText
 
 enum class BottomNavigationItem(val icon: Int, val navDestination: DestinationScreen) {
     CHATLIST(R.drawable.chat, DestinationScreen.ChatList),
@@ -35,14 +37,13 @@ enum class BottomNavigationItem(val icon: Int, val navDestination: DestinationSc
 
 @Composable
 fun BottomNavigationMenu(
-    selectedItem: BottomNavigationItem, navController: NavController
+    selectedItem: BottomNavigationItem, navController: NavController, modifier: Modifier
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(64.dp)
-            .padding(top = 4.dp, bottom = 8.dp)
-            .background(Color.White),
+            .height(50.dp)
+            .background(color = lightheading),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -51,17 +52,19 @@ fun BottomNavigationMenu(
                 painter = painterResource(id = item.icon),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(50.dp)
                     .padding(4.dp)
                     .weight(1f)
                     .clickable {
                         navigateTo(navController, item.navDestination.route)
                     }, alignment = Alignment.Center,
-                colorFilter = if(item == selectedItem){
-                    ColorFilter.tint(color = Color.Black)
-                }else{
-                    ColorFilter.tint(Color.Gray)
-                }
+                colorFilter = ColorFilter.tint(
+                    color = if(item == selectedItem){
+                        Color.Black
+                    } else {
+                       Color.Gray
+                    }
+                )
             )
         }
     }
