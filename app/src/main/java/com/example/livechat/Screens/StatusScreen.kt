@@ -3,6 +3,7 @@ package com.example.livechat.Screens
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.livechat.*
 import com.example.livechat.ui.theme.lightheading
+import com.example.livechat.ui.theme.lightmyText
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -69,6 +71,7 @@ fun StatusScreen(navController: NavHostController, vm: LCViewModel) {
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
+                    .background(lightmyText)
             ) {
                 if (inProgress) {
                     CommonProgressBar()

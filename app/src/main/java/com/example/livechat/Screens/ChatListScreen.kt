@@ -86,11 +86,6 @@ fun ChatListScreen(navController: NavHostController, vm: LCViewModel) {
                         .padding(paddingValues)
                         .background(color = lightmyText)
                 ) {
-//                    TitleText(
-//                        txt = "Chats",
-//                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp).background(color = lightheading),
-//                    )
-
                     if (chats.isEmpty()) {
                         Column(
                             modifier = Modifier

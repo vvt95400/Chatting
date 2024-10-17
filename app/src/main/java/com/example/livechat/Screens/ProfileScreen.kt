@@ -234,7 +234,6 @@ fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavControlle
     val launcher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
             uri?.let {
-                Log.d("TAG", "line 229")
                 vm.uploadProfileImage(uri) {
                     imgUrl = it.toString()
                     navigateTo(
@@ -244,35 +243,38 @@ fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavControlle
                 }
             }
         }
+
     Box(
         modifier = Modifier
             .padding(8.dp)
             .size(width = 200.dp, height = 200.dp)
             .fillMaxWidth(),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center // Ensures the content is centered in the box
     ) {
         Column(
             modifier = Modifier
-                .padding(8.dp)
                 .fillMaxWidth()
                 .clickable {
                     launcher.launch("image/*")
-                }, horizontalAlignment = Alignment.CenterHorizontally
+                },
+            horizontalAlignment = Alignment.CenterHorizontally, // Centers the column content
+            verticalArrangement = Arrangement.Center // Vertically centers the content in the column
         ) {
 
             Card(
-                shape = CircleShape, modifier = Modifier
-                    .padding(8.dp)
-                    .size(100.dp)
+                shape = CircleShape,
+                modifier = Modifier.fillMaxSize()
             ) {
                 AsyncImage(
                     model = imgUrl,
-                    contentDescription = "Translated description of what the image contains"
+                    contentDescription = "Profile picture",
+                    modifier = Modifier.fillMaxSize() // Ensures the image fills the card
                 )
-//                Picasso.get().load(imgUrl).into()
-//                CommonImage(data = imgUrl)
             }
-            Text(text = "Change Profile Picture")
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Text(text = "Change Profile Picture", color = Color.Gray)
         }
 
         if (vm.inProgress.value) {
@@ -281,3 +283,56 @@ fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavControlle
     }
 }
 
+
+//fun ProfileImage(imageUrl: String?, vm: LCViewModel, navController: NavController) {
+//    var imgUrl by remember { mutableStateOf(imageUrl) }
+//    val launcher =
+//        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+//            uri?.let {
+//                Log.d("TAG", "line 229")
+//                vm.uploadProfileImage(uri) {
+//                    imgUrl = it.toString()
+//                    navigateTo(
+//                        navController = navController,
+//                        route = DestinationScreen.Profile.route
+//                    )
+//                }
+//            }
+//        }
+//    Box(
+//        modifier = Modifier
+//            .padding(8.dp)
+//            .size(width = 200.dp, height = 200.dp)
+//            .fillMaxWidth(),
+//        contentAlignment = Alignment.Center
+//    ) {
+//        Column(
+//            modifier = Modifier
+//                .padding(8.dp)
+//                .fillMaxWidth()
+//                .clickable {
+//                    launcher.launch("image/*")
+//                }, horizontalAlignment = Alignment.CenterHorizontally
+//        ) {
+//
+//            Card(
+//                shape = CircleShape, modifier = Modifier
+//                    .padding(8.dp)
+//                    .size(100.dp)
+//            ) {
+//                AsyncImage(
+//                    model = imgUrl,
+//                    contentDescription = "Translated description of what the image contains"
+//                )
+////                Picasso.get().load(imgUrl).into()
+////                CommonImage(data = imgUrl)
+//            }
+//            Text(text = "Change Profile Picture")
+//        }
+//
+//        if (vm.inProgress.value) {
+//            CommonProgressBar()
+//        }
+//    }
+//}
+//

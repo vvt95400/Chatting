@@ -378,70 +378,6 @@ class LCViewModel @Inject constructor(
         db.collection(STATUS).document().set(newStatus)
     }
 
-//    fun populateStatus() {
-//        val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
-//        val cutOff = System.currentTimeMillis() - timeDelta
-//        inProgressStatus.value = true
-//        val currentUserId = userData.value?.userId
-//
-//        if (currentUserId == null) {
-//            Log.d("TAG", "User data is not available")
-//            handleException(customMessage = "User data is not available")
-//            inProgressStatus.value = false
-//            return
-//        }
-//
-//        db.collection(CHATS).where(
-//            Filter.or(
-//                Filter.equalTo("user1.userId", currentUserId),
-//                Filter.equalTo("user2.userId", currentUserId)
-//            )
-//        ).addSnapshotListener { value, error ->
-//            if (error != null) {
-//                Log.d("TAG","line 401")
-//                Log.d("TAG", "Error fetching chats: ${error.message}")
-//                handleException(error)
-//                inProgressStatus.value = false
-//                return@addSnapshotListener
-//            }
-//
-//            if (value != null) {
-//                Log.d("TAG", "QuerySnapshot contents:")
-//                for (doc in value.documents) {
-//                    Log.d("TAG", "Document ID: ${doc.id}")
-//                    Log.d("TAG", "Document data: ${doc.data}")
-//                }
-//
-//                val currentConnections = arrayListOf(userData.value?.userId)
-//                val chats = value.toObjects<ChatData>()
-//                chats.forEach { chat ->
-//                    if (chat.user1.userId == currentUserId) {
-//                        currentConnections.add(chat.user2.userId)
-//                    } else if (chat.user2.userId == currentUserId) {
-//                        currentConnections.add(chat.user1.userId)
-//                    }
-//                }
-//
-//                db.collection(STATUS).whereGreaterThan("timeStamp", cutOff).whereIn("user.userId", currentConnections)
-//                    .addSnapshotListener { value, error ->
-//                        if(error != null){
-//                            handleException(error)
-//                        }
-//                        if(value != null){
-//                            Log.d("TAG","line 401")
-//                            status.value = value.toObjects()
-//                            inProgressStatus.value = false
-//                        }
-//                    }
-//            } else {
-//                Log.d("TAG", "No data found")
-//                chats.value = emptyList()
-//            }
-//            inProgressStatus.value = false
-//
-//        }
-//    }
-
     fun populateStatus() {
         val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
         val cutOff = System.currentTimeMillis() - timeDelta
@@ -491,9 +427,10 @@ class LCViewModel @Inject constructor(
                         Log.d("TAGSTATUS", "Current connections: $currentConnections")
 
                         // Simplified test query
-                        val testUserIds = listOf("knownUserId1", "knownUserId2") // Replace with actual known user IDs
+                        val testUserIds = listOf(currentConnections[0], currentConnections[1]) // Replace with actual known user IDs
                         db.collection(STATUS)
-                            .whereIn("user.userId", testUserIds)
+                            .whereGreaterThan("timeStamp", cutOff)
+                            .whereIn("user.userId", currentConnections)
                             .get()
                             .addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
@@ -547,78 +484,4 @@ class LCViewModel @Inject constructor(
     fun depopulateStatus() {
         status.value = emptyList()
     }
-
-
-//    fun populateStatus() {
-//        val timeDelta = 24L * 60 * 60 * 1000 // 24 hours in milliseconds
-//        val cutOff = System.currentTimeMillis() - timeDelta
-//        inProgressStatus.value = true
-//        val currentUserId = userData.value?.userId
-//
-//        if (currentUserId == null) {
-//            Log.d("TAGSTATUS", "Statuses retrieved")
-//            Log.d("TAG", "User data is not available")
-//            handleException(customMessage = "User data is not available")
-//            inProgressStatus.value = false
-//            return
-//        }
-//        Log.d("TAGSTATUS", "Statuses retrieved")
-//
-//        db.collection(CHATS).where(
-//            Filter.or(
-//                Filter.equalTo("user1.userId", currentUserId),
-//                Filter.equalTo("user2.userId", currentUserId)
-//            )
-//        ).addSnapshotListener { value, error ->
-//            if (error != null) {
-//                Log.d("TAG","Error fetching chats: ${error.message}")
-//                handleException(error)
-//                inProgressStatus.value = false
-//                return@addSnapshotListener
-//            }
-//
-//            if (value != null) {
-//                Log.d("TAG", "QuerySnapshot contents:")
-//                for (doc in value.documents) {
-//                    Log.d("TAG", "Document ID: ${doc.id}")
-//                    Log.d("TAG", "Document data: ${doc.data}")
-//                }
-//
-//                val currentConnections = mutableListOf<String>()
-//                val chats = value.toObjects<ChatData>()
-//                chats.forEach { chat ->
-//                    if (chat.user1.userId == currentUserId) {
-//                        chat.user2.userId?.let { currentConnections.add(chat.toString()) }
-//                    } else if (chat.user2.userId == currentUserId) {
-//                        chat.user1.userId?.let { currentConnections.add(chat.toString()) }
-//                    }
-//                }
-//                if (currentConnections.isNotEmpty()) {
-//                    Log.d("TAGSTATUS", "Statuses retrieved 491")
-//                    db.collection(STATUS).whereIn("user.userId", currentConnections)
-//                        .addSnapshotListener { value, error ->
-//                            if (error != null) {
-//                                Log.d("TAGSTATUS", "Statuses retrieved 494")
-//                                handleException(error)
-//                            }
-//                            if (value != null) {
-//                                Log.d("TAGSTATUS", "Statuses retrieved: ${value.documents.size}")
-//                                status.value = value.toObjects()
-//                            }
-//                            inProgressStatus.value = false
-//                        }
-//                } else {
-//                    Log.d("TAG", "No connections found")
-//                    inProgressStatus.value = false
-//                }
-//            } else {
-//                Log.d("TAG", "No data found")
-//                inProgressStatus.value = false
-//            }
-//        }
-//    }
-
 }
-
-
-//.whereGreaterThan("timeStamp", cutOff)
