@@ -14,18 +14,18 @@ LiveChat is a secure and user-friendly chatting application that simplifies comm
 
 ### Profile Page
 _Description: Customize your profile with a user-friendly interface._
-![Profile Screenshot](![pr1](https://github.com/user-attachments/assets/0d673d49-bcb8-4e40-8ebb-59f81148306b)
-)
+<br>
+<img src="https://github.com/user-attachments/assets/0d673d49-bcb8-4e40-8ebb-59f81148306b" alt="Chat List Screenshot" width="300" style = />
 
 ### Chatting Page
 _Description: Securely chat with friends using unique ID-based identification._
-![Chatting Screenshot](![chat1](https://github.com/user-attachments/assets/7f5f18b7-267d-41be-8afd-294f82cc0a98)
-)
+<br>
+<img src="https://github.com/user-attachments/assets/7f5f18b7-267d-41be-8afd-294f82cc0a98" alt="Chat List Screenshot" width="300"/>
 
 ### Chat List Page
 _Description: View your chat list with real-time updates from Firebase._
-![Chat List Screenshot](![chatlist1](https://github.com/user-attachments/assets/dbb53c33-31b5-4a70-bda7-72a94bf7d7a0)
-)
+<br>
+<img src="https://github.com/user-attachments/assets/dbb53c33-31b5-4a70-bda7-72a94bf7d7a0" alt="Chat List Screenshot" width="300"/>
 
 ## Technologies Used
 
