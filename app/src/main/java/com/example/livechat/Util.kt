@@ -1,5 +1,6 @@
 package com.example.livechat
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -12,8 +13,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
@@ -32,8 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.media3.effect.Crop
 import androidx.navigation.NavController
 import coil.compose.rememberImagePainter
-import com.example.livechat.ui.theme.darkheading
-import com.example.livechat.ui.theme.lightheading
 
 fun navigateTo(navController: NavController, route: String) {
     navController.navigate(route) {
@@ -45,8 +46,7 @@ fun navigateTo(navController: NavController, route: String) {
 @Composable
 fun CommonProgressBar() {
     Row(modifier = Modifier
-        .alpha(0.5f)
-        .background(Color.LightGray)
+        .alpha(0.4f)
         .clickable(enabled = false) {}
         .fillMaxSize(),
         verticalAlignment = Alignment.CenterVertically,
@@ -58,7 +58,7 @@ fun CommonProgressBar() {
 @Composable
 fun CommonDivider() {
     Divider(
-        color = Color.LightGray,
+//        color = Color.LightGray,
         thickness = 1.dp,
         modifier = Modifier
             .alpha(0.3f)
@@ -82,9 +82,10 @@ fun CommonImage(
 }
 
 @Composable
-fun checkSignedIn(vm: LCViewModel, navController: NavController) {
+fun CheckSignedIn(vm: LCViewModel, navController: NavController) {
     val alreadySignedIn = remember { mutableStateOf(false) }
     val signedIn = vm.signIn.value
+    Log.d("TAG", "User is Signed Up:- $signedIn")
     if (signedIn && !alreadySignedIn.value) {
         alreadySignedIn.value = true
         navController.navigate(DestinationScreen.ChatList.route) {
@@ -94,25 +95,13 @@ fun checkSignedIn(vm: LCViewModel, navController: NavController) {
 }
 
 @Composable
-fun TitleText(txt: String, modifier: Modifier) {
-    Text(
-        text = txt,
-        fontWeight = FontWeight.Bold,
-        fontSize = 32.sp,
-        modifier = Modifier
-            .padding(13.dp),
-//            .background(color = lightheading),
-        color = Color.White,
-
-        )
-}
-
-@Composable
 fun CommonRow(imageUrl: String?, name: String?,modifier: Modifier, onItemClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .height(70.dp)
+//            .background(color = MaterialTheme.colorScheme.primary)
+            .clip(shape = RoundedCornerShape(8.dp))
             .clickable {
                 onItemClick.invoke()
             }, verticalAlignment = Alignment.CenterVertically
@@ -123,13 +112,13 @@ fun CommonRow(imageUrl: String?, name: String?,modifier: Modifier, onItemClick: 
                 .padding(8.dp)
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(Color.Cyan)
+                .background(Color.LightGray)
         )
         Text(
             text = name ?: "---",
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(start = 4.dp),
-            color = Color.Black
+            modifier = Modifier.padding(start = 4.dp).clip(RoundedCornerShape(8.dp)),
+            color = Color.DarkGray
         )
 
     }

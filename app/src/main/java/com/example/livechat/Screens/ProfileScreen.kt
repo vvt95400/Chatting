@@ -1,11 +1,7 @@
 package com.example.livechat.Screens
 
-import android.graphics.drawable.Icon
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,23 +14,19 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.rounded.ArrowBack
-import androidx.compose.material.icons.rounded.Save
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -56,17 +48,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
-import com.example.livechat.CommonDivider
-import com.example.livechat.CommonImage
 import com.example.livechat.CommonProgressBar
 import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
-import com.example.livechat.TitleText
 import com.example.livechat.navigateTo
-import com.example.livechat.ui.theme.lightheading
-import com.example.livechat.ui.theme.lightmyText
-import com.example.livechat.ui.theme.lightyourText
-import com.squareup.picasso.Picasso
+import com.example.livechat.ui.theme.color3
 
 @Composable
 fun ProfileScreen(navController: NavController, vm: LCViewModel) {
@@ -132,21 +118,21 @@ fun ProfileContent(
                         text = "Profile",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White
+                        color = Color.DarkGray
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = Color.DarkGray)
                     }
                 },
                 actions = {
                     TextButton(onClick = onSave) {
-                        Text("Save", fontSize = 20.sp, color = Color.White)
+                        Text("Save", fontSize = 20.sp, color = Color.DarkGray)
                     }
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = lightheading
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.LightGray
                 ),
                 scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
             )
@@ -163,8 +149,7 @@ fun ProfileContent(
         Column(
             modifier = Modifier
                 .padding(paddingValues)
-                .fillMaxSize()
-                .background(color = lightmyText),
+                .fillMaxSize(),
             verticalArrangement = Arrangement.Top,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -182,15 +167,20 @@ fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Name", modifier = Modifier.width(100.dp).padding(16.dp), fontSize = 18.sp)
-                TextField(
+                OutlinedTextField(
                     value = name,
                     onValueChange = onNameChange,
-                    colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = Color.Blue,
-                        unfocusedIndicatorColor = Color.Gray
+                    shape = RoundedCornerShape(50), // Fully rounded corners
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Gray, // Border color when focused
+                        unfocusedBorderColor = Color.LightGray // Border color when not focused
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 )
+
+
             }
 
             // Number Input
@@ -201,14 +191,17 @@ fun ProfileContent(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = "Number", modifier = Modifier.width(100.dp).padding(16.dp), fontSize = 18.sp)
-                TextField(
+                OutlinedTextField(
                     value = number,
                     onValueChange = onNumberChange,
-                    colors = TextFieldDefaults.textFieldColors(
-                        focusedIndicatorColor = Color.Blue,
-                        unfocusedIndicatorColor = Color.Gray
+                    shape = RoundedCornerShape(50), // Fully rounded corners
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color.Gray, // Border color when focused
+                        unfocusedBorderColor = Color.LightGray, // Border color when not focused
                     ),
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 )
             }
 
@@ -217,7 +210,7 @@ fun ProfileContent(
             // Logout Button
             Button(
                 onClick = onLogout,
-                colors = ButtonDefaults.buttonColors(containerColor = lightyourText),
+                colors = ButtonDefaults.buttonColors(containerColor = color3),
                 modifier = Modifier.padding(25.dp).width(200.dp),
                 shape = RoundedCornerShape(50)
             ) {

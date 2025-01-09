@@ -42,7 +42,6 @@ sealed class DestinationScreen(var route: String) {
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-//        enableEdgeToEdge()
         setContent {
             LiveChatTheme {
                 Surface(

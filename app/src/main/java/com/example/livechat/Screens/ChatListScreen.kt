@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.AlertDialog
@@ -27,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -47,12 +45,10 @@ import com.example.livechat.CommonProgressBar
 import com.example.livechat.CommonRow
 import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
-import com.example.livechat.TitleText
 import com.example.livechat.navigateTo
-import com.example.livechat.ui.theme.lightheading
-import com.example.livechat.ui.theme.lightmyText
+import com.example.livechat.ui.theme.color3
 
-@OptIn(ExperimentalMaterial3Api::class)
+
 @Composable
 fun ChatListScreen(navController: NavHostController, vm: LCViewModel) {
     val inProcess = vm.inProgressChats
@@ -84,7 +80,7 @@ fun ChatListScreen(navController: NavHostController, vm: LCViewModel) {
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues)
-                        .background(color = lightmyText)
+//                        .background(color = MaterialTheme.colorScheme.primaryContainer)
                 ) {
                     if (chats.isEmpty()) {
                         Column(
@@ -176,7 +172,7 @@ fun FAB(
 
     FloatingActionButton(
         onClick = { onFABClick.invoke() },
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = color3,
         shape = CircleShape,
         modifier = Modifier
             .padding(bottom = 56.dp, end = 30.dp)
@@ -201,9 +197,9 @@ fun TopBarWithMenu() {
         title = {
             Text(
                 text = "Chats",
-                fontSize = 40.sp,
+                fontSize = 35.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White,
+                color = Color.DarkGray,
                 modifier = Modifier.padding(15.dp)
             )
         },
@@ -212,7 +208,7 @@ fun TopBarWithMenu() {
                 Icon(
                     imageVector = Icons.Default.MoreVert,
                     contentDescription = "Menu",
-                    tint = Color.White
+                    tint = Color.DarkGray
                 )
             }
 
@@ -233,7 +229,7 @@ fun TopBarWithMenu() {
 
                 DropdownMenuItem(
                     onClick = {
-                        // Handle the logout action
+                        //fuunction for logout
                         expanded = false
                     },
                     text = {
@@ -243,8 +239,8 @@ fun TopBarWithMenu() {
 
             }
         },
-        colors = TopAppBarDefaults.smallTopAppBarColors(
-            containerColor = lightheading
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = Color.LightGray
         ),
         scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
     )

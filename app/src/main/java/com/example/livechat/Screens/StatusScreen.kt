@@ -3,13 +3,11 @@ package com.example.livechat.Screens
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -22,8 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.example.livechat.*
-import com.example.livechat.ui.theme.lightheading
-import com.example.livechat.ui.theme.lightmyText
+import com.example.livechat.ui.theme.color3
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,14 +51,14 @@ fun StatusScreen(navController: NavHostController, vm: LCViewModel) {
                 title = {
                     Text(
                         text = "Status",
-                        fontSize = 40.sp,
+                        fontSize = 35.sp,
                         fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        color = Color.DarkGray,
                         modifier = Modifier.padding(15.dp)
                     )
                 },
-                colors = TopAppBarDefaults.smallTopAppBarColors(
-                    containerColor = lightheading
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.LightGray
                 ),
                 scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
             )
@@ -71,7 +68,7 @@ fun StatusScreen(navController: NavHostController, vm: LCViewModel) {
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxSize()
-                    .background(lightmyText)
+//                    .background(lightmyText)
             ) {
                 if (inProgress) {
                     CommonProgressBar()
@@ -139,7 +136,7 @@ fun FAB(onFABclick: () -> Unit) {
             .padding(bottom = 56.dp, end = 30.dp)
             .size(56.dp),
         onClick = onFABclick,
-        containerColor = MaterialTheme.colorScheme.primary,
+        containerColor = color3,
         shape = CircleShape
     ) {
         Icon(

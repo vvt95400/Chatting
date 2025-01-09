@@ -14,8 +14,7 @@ val darkheading = Color(0xFF330000)
 val darkmyText = Color(0xFFD09683)
 val darkyourText = Color(0xFF73605B)
 
-val lightheading = Color(0xFF962E2A)
-val lightmyText = Color(0xFFE3867D)
-val lightyourText = Color(0xFFA1D6E2)
-val chatscolor = Color(0xFF8D2D4D)
+
+val color3 = Color(0xFF9F4FCD)
+
 

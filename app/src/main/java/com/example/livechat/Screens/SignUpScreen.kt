@@ -37,17 +37,17 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.example.livechat.CheckSignedIn
 import com.example.livechat.CommonProgressBar
 import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
 import com.example.livechat.R
-import com.example.livechat.checkSignedIn
 import com.example.livechat.navigateTo
 
 @Composable
 fun SignUpScreen(navController: NavController, vm: LCViewModel) {
 
-    checkSignedIn(vm = vm, navController = navController)
+    CheckSignedIn(vm = vm, navController = navController)
 
     val nameState = remember { mutableStateOf(TextFieldValue()) }
     val emailState = remember { mutableStateOf(TextFieldValue()) }

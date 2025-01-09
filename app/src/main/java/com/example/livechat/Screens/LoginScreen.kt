@@ -41,7 +41,7 @@ import com.example.livechat.CommonProgressBar
 import com.example.livechat.DestinationScreen
 import com.example.livechat.LCViewModel
 import com.example.livechat.R
-import com.example.livechat.checkSignedIn
+import com.example.livechat.CheckSignedIn
 import com.example.livechat.navigateTo
 
 @Composable
@@ -53,7 +53,7 @@ fun LoginScreen(navController: NavController, vm: LCViewModel) {
         if (passwordVisible.value) VisualTransformation.None else PasswordVisualTransformation()
     val focus = LocalFocusManager.current
 
-    checkSignedIn(vm = vm, navController = navController)
+    CheckSignedIn(vm = vm, navController = navController)
 
     Box(modifier = Modifier.fillMaxSize()) {
         Column(

@@ -17,7 +17,8 @@ data class UserData(
 data class ChatData(
     val chatId : String?="",
     val user1 : ChatUser = ChatUser(),
-    val user2 : ChatUser = ChatUser()
+    val user2 : ChatUser = ChatUser(),
+    val chatKey : String?=""
 )
 
 data class ChatUser(
@@ -30,7 +31,8 @@ data class ChatUser(
 data class Message(
     var sendBy: String?="",
     var message: String?="",
-    var timeStamp: String?=""
+    var timeStamp: String?="",
+    var iv: String?=""
 )
 
 data class Status(

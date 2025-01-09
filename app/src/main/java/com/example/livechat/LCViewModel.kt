@@ -27,6 +27,12 @@ import java.lang.Exception
 import java.util.Calendar
 import java.util.UUID
 import javax.inject.Inject
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.IvParameterSpec
+import java.util.Base64
+import javax.crypto.spec.SecretKeySpec
 
 @HiltViewModel
 class LCViewModel @Inject constructor(
@@ -42,6 +48,7 @@ class LCViewModel @Inject constructor(
     var userData = mutableStateOf<UserData?>(null)
     val chats = mutableStateOf<List<ChatData>>(listOf())
     val chatMessages = mutableStateOf<List<Message>>(listOf())
+    var chatKey: String = ""
     val inProgressChatMessage = mutableStateOf(false)
     var currentChatMessageListner: ListenerRegistration? = null
     val status = mutableStateOf<List<Status>>(listOf())
@@ -53,6 +60,46 @@ class LCViewModel @Inject constructor(
         currentUser?.uid?.let {
             getUserData(it)
         }
+    }
+
+    fun generateKey(): String{
+        val keygen = KeyGenerator.getInstance("AES")
+        keygen.init(256)
+
+        val secretKey: SecretKey = keygen.generateKey()
+        val encodedKey: ByteArray = secretKey.encoded
+
+        return Base64.getEncoder().encodeToString(encodedKey)
+    }
+
+    fun encrypt_f(encodedKey : String,text: String): List<String>{
+        val preKey: ByteArray = Base64.getDecoder().decode(encodedKey)
+        val key : SecretKey = SecretKeySpec(preKey, 0, preKey.size, "AES")
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        val byteText : ByteArray = text.toByteArray(Charsets.UTF_8)
+        cipher.init(Cipher.ENCRYPT_MODE, key)
+        val cipherByteText: ByteArray = cipher.doFinal(byteText)
+        val iv : ByteArray = cipher.iv
+        val cipherText : String = Base64.getEncoder().encodeToString(cipherByteText)
+        println("The cipher text is : $cipherText")
+        val ivText: String = Base64.getEncoder().encodeToString(iv)
+        val ansList = listOf(cipherText,ivText)
+        return ansList
+    }
+
+    fun decrypt_f(encodedKey: String, lst: List<String>): String{
+        val preKey: ByteArray = Base64.getDecoder().decode(encodedKey)
+        val key : SecretKey = SecretKeySpec(preKey, 0, preKey.size, "AES")
+        val cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING")
+        val cipherText: String = lst[0]
+        val ivText: String = lst[1]
+        val cipherByteText : ByteArray = Base64.getDecoder().decode(cipherText)
+        val iv : ByteArray = Base64.getDecoder().decode(ivText)
+        cipher.init(Cipher.DECRYPT_MODE, key, IvParameterSpec(iv))
+        val decryptedBytes: ByteArray = cipher.doFinal(cipherByteText)
+        val decryptedText = String(decryptedBytes, Charsets.UTF_8)
+        println("Decrypted Text is $decryptedText")
+        return decryptedText
     }
 
     fun populateChats() {
@@ -100,11 +147,10 @@ class LCViewModel @Inject constructor(
     }
 
 
-    fun signUp(name: String, number: String, email: String, password: String) {
+    fun signUp(name: String, number: String, email: String, password: String){
         inProgress.value = true
         if (name.isEmpty() || number.isEmpty() || email.isEmpty() || password.isEmpty()) {
             handleException(customMessage = "Please fill all fields")
-            return
         }
         inProgress.value = true
         Log.d("TAG", "SIgn Up successful")
@@ -125,7 +171,6 @@ class LCViewModel @Inject constructor(
                 inProgress.value = false
             }
         }
-
     }
 
     fun login(email: String, password: String) {
@@ -273,6 +318,7 @@ class LCViewModel @Inject constructor(
                         } else {
                             val chatPartner = userQuery.toObjects<UserData>()[0]
                             val id = db.collection(CHATS).document().id
+                            val key : String = generateKey()
                             val chat = ChatData(
                                 chatId = id,
                                 user1 = ChatUser(
@@ -286,7 +332,8 @@ class LCViewModel @Inject constructor(
                                     chatPartner.name ?: "",
                                     chatPartner.number ?: "",
                                     chatPartner.imageUrl ?: ""
-                                )
+                                ),
+                                chatKey = key
                             )
                             db.collection(CHATS).document(id).set(chat).addOnSuccessListener {
                                 populateChats()
@@ -310,7 +357,7 @@ class LCViewModel @Inject constructor(
         }
     }
 
-    fun onSendMessage(chatID: String, message: String) {
+    fun onSendMessage(chatID: String, message: String, ivString: String) {
         // Get the current timestamp
         val time = Calendar.getInstance().time.toString()
 
@@ -318,7 +365,8 @@ class LCViewModel @Inject constructor(
         val msg = Message(
             sendBy = userData.value?.userId,
             message = message,
-            timeStamp = time
+            timeStamp = time,
+            iv = ivString
         )
 
         // Add the message to the specified chat document
@@ -347,6 +395,32 @@ class LCViewModel @Inject constructor(
                     chatMessages.value = value.documents.mapNotNull { doc ->
                         doc.toObject<Message>()
                     }.sortedBy { it.timeStamp }
+                    inProgressChatMessage.value = false
+                }
+            }
+    }
+
+    fun getChatKey(chatID: String) {
+        inProgressChatMessage.value = true
+        currentChatMessageListner = db.collection(CHATS).document(chatID)
+            .addSnapshotListener { value, error ->
+                if (error != null) {
+                    Log.d("TAG", "Chat key does not exist")
+                    handleException(error)
+                    inProgressChatMessage.value = false
+                    return@addSnapshotListener
+
+                }
+                if (value != null && value.exists()) {
+                    // Convert DocumentSnapshot to ChatData
+                    val chatData = value.toObject(ChatData::class.java)
+
+                    // Check if chatData is not null and assign chatKey
+                    chatKey = chatData?.chatKey ?: ""
+                    inProgressChatMessage.value = false
+                }else {
+                    Log.d("TAG", "The value of chatKey is $value")
+                    handleException(customMessage = "Chat not found")
                     inProgressChatMessage.value = false
                 }
             }
@@ -426,28 +500,32 @@ class LCViewModel @Inject constructor(
                     if (currentConnections.isNotEmpty()) {
                         Log.d("TAGSTATUS", "Current connections: $currentConnections")
 
-                        // Simplified test query
-                        val testUserIds = listOf(currentConnections[0], currentConnections[1]) // Replace with actual known user IDs
-                        db.collection(STATUS)
-                            .whereGreaterThan("timeStamp", cutOff)
-                            .whereIn("user.userId", currentConnections)
-                            .get()
-                            .addOnCompleteListener { task ->
-                                if (task.isSuccessful) {
-                                    val documents = task.result
-                                    if (documents != null) {
-                                        Log.d("TAGSTATUS", "Test query statuses retrieved: ${documents.size()}")
-                                        for (doc in documents) {
-                                            Log.d("TAGSTATUS", "Document ID: ${doc.id}")
-                                            Log.d("TAGSTATUS", "Document data: ${doc.data}")
+                        // Safely check size before accessing the list
+                        if (currentConnections.size > 1) {
+                            val testUserIds = listOf(currentConnections[0], currentConnections[1]) // Replace with actual known user IDs
+                            db.collection(STATUS)
+                                .whereGreaterThan("timeStamp", cutOff)
+                                .whereIn("user.userId", currentConnections)
+                                .get()
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        val documents = task.result
+                                        if (documents != null) {
+                                            Log.d("TAGSTATUS", "Test query statuses retrieved: ${documents.size()}")
+                                            for (doc in documents) {
+                                                Log.d("TAGSTATUS", "Document ID: ${doc.id}")
+                                                Log.d("TAGSTATUS", "Document data: ${doc.data}")
+                                            }
+                                        } else {
+                                            Log.d("TAGSTATUS", "Test query no statuses found")
                                         }
                                     } else {
-                                        Log.d("TAGSTATUS", "Test query no statuses found")
+                                        Log.d("TAGSTATUS", "Test query failed: ${task.exception?.message}")
                                     }
-                                } else {
-                                    Log.d("TAGSTATUS", "Test query failed: ${task.exception?.message}")
                                 }
-                            }
+                        } else {
+                            Log.d("TAGSTATUS", "Not enough connections to run the test query")
+                        }
 
                         db.collection(STATUS)
                             .whereGreaterThan("timeStamp", cutOff)
@@ -480,6 +558,7 @@ class LCViewModel @Inject constructor(
                 }
             }
     }
+
 
     fun depopulateStatus() {
         status.value = emptyList()
